@@ -3,52 +3,45 @@ from typing import Any, Dict, Callable
 from pydantic import BaseModel
 from functools import wraps
 
+
 class Tool(BaseModel):
     name: str
     description: str
     properties: Dict[str, Any]
     func: Callable
 
-def parse_docstring(docstring: str) -> Dict[str, str]:
-    param_descriptions = {}
-    if (docstring):
-        lines = docstring.split('\n')
-        for line in lines:
-            line = line.strip()
-            if line.startswith(':param'):
-                parts = line.split(':')
-                if len(parts) >= 3:
-                    param_name = parts[1].strip().split(' ')[1]
-                    param_description = parts[2].strip()
-                    param_descriptions[param_name] = param_description
-    return param_descriptions
-
 type_mapping = {
     str: "string",
     int: "integer",
     float: "number",
     bool: "boolean",
-    Any: "any"
+    list: "array",
+    dict: "object",
+    type(None): "null"
 }
-
-def generate_properties(func: callable) -> Dict[str, Any]:
-    signature = inspect.signature(func)
-    docstring = inspect.getdoc(func)
-    param_descriptions = parse_docstring(docstring)
-    properties = {}
-    for param in signature.parameters.values():
-        param_type = type_mapping.get(param.annotation, "unknown")
-        properties[param.name] = {
-            'type': param_type,
-            'description': param_descriptions.get(param.name, '')
-        }
-    return properties
 
 def tool(func: callable) -> Tool:
     name = func.__name__
-    properties = generate_properties(func)
+    signature = inspect.signature(func)
+    
+    parameters = {}
+    for param in signature.parameters.values():
+        try:
+            param_type = type_mapping.get(param.annotation, "string")
+        except KeyError as e:
+            raise KeyError(
+                f"Unknown type annotation {param.annotation} for parameter {param.name}: {str(e)}"
+            )
+        parameters[param.name] = {"type": param_type}
+    
+    required = [
+        param.name
+        for param in signature.parameters.values()
+        if param.default == inspect._empty
+    ]
+    
     description = (inspect.getdoc(func) or '').split('\n\n')[0]
-    tool = Tool(name=name, properties=properties, description=description, func=func)
+    tool = Tool(name=name, properties=parameters, description=description, func=func)
     
     def to_json() -> Dict[str, Any]:
         return {
@@ -58,8 +51,8 @@ def tool(func: callable) -> Tool:
                 "inputSchema": {
                     "json": {
                         'type': 'object',
-                        'properties': tool.properties,
-                        'required': list(tool.properties.keys())
+                        'properties': parameters,
+                        'required': required
                     }
                 }
             }

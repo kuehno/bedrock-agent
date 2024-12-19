@@ -1,6 +1,31 @@
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+import json
 
+
+class PriceType(BaseModel):
+        input: float
+        output: float
+
+class PriceCategory(BaseModel):
+    on_demand: PriceType
+    batch: PriceType
+    
+class PricingInfo(BaseModel):
+    model_pricing: Dict[str, PriceCategory] = {}
+    
+    @classmethod
+    def from_json(cls, file_path: str) -> "PricingInfo":
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        
+        pricing_info = cls()
+        for model_id, prices in data.items():
+            pricing_info.model_pricing[model_id] = PriceCategory(
+                on_demand=PriceType(**prices['on_demand']),
+                batch=PriceType(**prices['batch'])
+            )
+        return pricing_info
 
 class ModelConfig(BaseModel):
     model_id: str = "amazon.nova-micro-v1:0"
@@ -39,8 +64,8 @@ class ToolUse(BaseModel):
         }
 
 class Content(BaseModel):
-    toolUse: Optional[ToolUse] = None
     text: Optional[str] = None
+    toolUse: Optional[ToolUse] = None
 
     def to_json(self) -> Dict[str, Any]:
         if self.toolUse:

@@ -1,0 +1,52 @@
+{
+    "anthropic.claude-3-5-sonnet-20240620-v1:0": {
+        "on_demand": {
+            "input": 0.003,
+            "output": 0.015
+        },
+        "batch": {
+            "input": 0.0015,
+            "output": 0.0075
+        }
+    },
+    "anthropic.claude-3-haiku-20240307-v1:0": {
+        "on_demand": {
+            "input": 0.00025,
+            "output": 0.00125
+        },
+        "batch": {
+            "input": 0.000125,
+            "output": 0.000625
+        }
+    },
+    "amazon.nova-micro-v1:0": {
+        "on_demand": {
+            "input": 0.000035,
+            "output": 0.00014
+        },
+        "batch": {
+            "input": 0.000017,
+            "output": 0.00007
+        }
+    },
+    "amazon.nova-lite-v1:0": {
+        "on_demand": {
+            "input": 0.00006,
+            "output": 0.00024
+        },
+        "batch": {
+            "input": 0.00003,
+            "output": 0.00012
+        }
+    },
+    "amazon.nova-pro-v1:0": {
+        "on_demand": {
+            "input": 0.0008,
+            "output": 0.0032
+        },
+        "batch": {
+            "input": 0.0004,
+            "output": 0.0016
+        }
+    }
+}
