@@ -9,6 +9,7 @@ import boto3
 import json
 
 
+# TODO: Move some functions and vars from BedrockAgent to AgentBase
 class AgentBase():    
     @staticmethod
     def get_message(content: str = "Who are you?", role: str = "user"):
@@ -155,6 +156,7 @@ class BedrockAgent(AgentBase):
         response = self.completion(message, role, *args, **kwargs)
         stop_reason = response.stopReason
         
+        # TODO: Refactor the while not done loop to not run indefinitely but rather a fixes number of iterations
         while not done: 
             if stop_reason == "end_turn":
                 message = response.output.message.to_json()
@@ -175,6 +177,7 @@ class BedrockAgent(AgentBase):
                         
                         handoff_agent = tool_result.agent
                         if handoff_agent:
+                            # TODO: Modify input from handoff agent such that .get("request") is not needed. Might lead to errors in the current implementation.
                             handoff_response = handoff_agent.chat(content.toolUse.input.get("request"))
                             
                             # add handoff_agents trace to self with unique id -> in case multiple agents are used througoht the whole conversation

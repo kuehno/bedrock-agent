@@ -38,11 +38,12 @@ python3 -m pip install -e .
 
 ## Usage
 
-The project includes a `demo.ipynb` notebook that demonstrates:
+The project includes `demo.ipynb` notebooks that demonstrate:
 
 - Creating custom tools using the `@tool` decorator
 - Initializing a BedrockAgent with model configuration
 - Running chat interactions with dummy weather and poem generation capabilities
+- Running multi-agent chats where each agent can call another agent and also call other functions in the process
 
 ## Creating Custom Tools
 
@@ -78,15 +79,19 @@ def get_weather(city: str, country: str = "US") -> dict:
 ```
 bedrock_agent/        # Main package directory
 ├── agent.py          # BedrockAgent implementation
-├── data.py           # Data models and configurations
+├── types.py          # Data types and configurations
 ├── tool.py           # Tool decorator and utilities
 └── utils.py          # Helper functions
-demo.ipynb            # Interactive demo notebook
+
+notebooks/                      # Demo Notebooks
+├── demo_single_agent.ipynb     # Single-agent with dummy tools
+├── demo_multi_agent.ipynb      # Multiple agents with agent-to-agent handoffs and dummy tools
+└── demo_ddgs_wikipedia.ipynb   # Single-agent with DuckDuckGo and Wikipedia search tools
 ```
 
 ## Dependencies
 
-See `requirements.txt` for full list:
+See `setup.py` for full list:
 - boto3
 - pydantic
 - python-dotenv
@@ -97,6 +102,7 @@ See `requirements.txt` for full list:
 - [ ] Add example tool for fetching data from Databricks
 - [ ] Implement better error handling
 - [ ] Add unit tests
-- [ ] Create package
+- [X] Create package
+- [ ] Push package to pypi?
 - [ ] Add documentation for tool creation
 - [ ] Add example for lambda function (using IaC)
