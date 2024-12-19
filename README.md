@@ -17,7 +17,7 @@ However, since its light-weight by nature, it can be packaged for lambda functio
 ## Installation
 
 ```sh
-pip install -r requirements.txt
+pip install -e .
 ```
 
 or
@@ -25,7 +25,7 @@ or
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r requirements.txt
+python3 -m pip install -e .
 ```
 
 ## Configuration
