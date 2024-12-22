@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: pgvector/pgvector:pg17
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    volumes:
+      - ./init_scripts:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
