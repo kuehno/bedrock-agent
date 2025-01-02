@@ -10,4 +10,8 @@ setup(
         "python-dotenv==1.0.1",
         "loguru==0.7.3"
     ],
+    package_data={
+        '': ['pricing_info.json'],
+    },
+    include_package_data=True,
 )
