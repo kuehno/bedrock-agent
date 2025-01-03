@@ -93,7 +93,7 @@ class BedrockAgent(AgentBase):
     def handle_tool_result(self, tool_result: str | dict) -> ToolResult:
         match tool_result:
             case ToolResult() as tool_result:
-                return result
+                return tool_result
             case BedrockAgent() as agent:
                 return ToolResult(
                     value=str(tool_result),
