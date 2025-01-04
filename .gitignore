@@ -31,3 +31,13 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# WIP
+cookbook/terraform*
+**/.terraform/*
+.terraform.lock.hcl
+**/.terraform.lock.hcl
+*.pfile
+*.tfstate
+*.tfstate.*
+builds

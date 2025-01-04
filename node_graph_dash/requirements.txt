@@ -1,0 +1,4 @@
+setuptools==75.6.0
+Dash==2.18.2
+plotly==5.24.1
+networkx[default]==3.4.2
