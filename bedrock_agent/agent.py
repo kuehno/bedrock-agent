@@ -48,6 +48,7 @@ class BedrockAgent(AgentBase):
         self.tool_map = {}
         self.system_message = system_message
         self.handoff_agents_trace = {}
+        self.agent_graph = {}
         if tools:
             for tool in tools:
                 if callable(tool):
@@ -64,6 +65,10 @@ class BedrockAgent(AgentBase):
         total_costs += model_pricing.on_demand.input * (self.tokens_used["prompt_tokens"] / 1000)
         total_costs += model_pricing.on_demand.output * (self.tokens_used["completion_tokens"] / 1000)
         return '{:.10f}'.format(total_costs)
+    
+    @property
+    def full_agent_trace(self):
+        return {**{self.name: self}, **self.handoff_agents_trace}
     
     def add_handoff_agent_tokens(self, agent: AgentBase):
         self.tokens_used["prompt_tokens"] += agent.tokens_used["prompt_tokens"]
@@ -181,7 +186,7 @@ class BedrockAgent(AgentBase):
                             handoff_response = handoff_agent.chat(content.toolUse.input.get("request"))
                             
                             # add handoff_agents trace to self with unique id -> in case multiple agents are used througoht the whole conversation
-                            self.handoff_agents_trace[f"{handoff_agent.name}-{str(uuid.uuid4())[:4]}"] = handoff_agent.messages
+                            self.handoff_agents_trace[f"{handoff_agent.name}-{str(uuid.uuid4())[:4]}"] = handoff_agent
                             
                             # add handoff_agents tokens to self
                             self.add_handoff_agent_tokens(handoff_agent)
@@ -238,14 +243,37 @@ class BedrockAgent(AgentBase):
                 if "toolResult" in content_item:
                     result = content_item["toolResult"]
                     print(f"TOOL RESULT: {result['content'][0]['text']}")
-                    
+                 
     def draw_trace(self):
         self.draw_messages(self.messages)
                     
     def draw_handoff_agents_traces(self):
-        for agent_name, messages in self.handoff_agents_trace.items():
+        for agent_name, agent_cls in self.handoff_agents_trace.items():
             print(f"\n{'='*50}")
             print(f"Handoff Agent: {agent_name}")
             print(f"{'='*50}")
             
-            self.draw_messages(messages)
+            self.draw_messages(agent_cls.messages)
+            
+    def recursive_create_handoff_agents_graph(self, a: AgentBase, a_graph: dict = {}):
+            for agent_name, agent_cls in a.handoff_agents_trace.items():
+                a_graph[agent_name] = {
+                    "messages": agent_cls.messages,
+                    "HandoffAgents": {}
+                }
+                self.recursive_create_handoff_agents_graph(agent_cls, a_graph[agent_name]["HandoffAgents"])
+            return a_graph
+    
+    def create_agent_graph(self):
+        self.agent_graph = {
+            self.name: {
+                "messages": self.messages,
+                "HandoffAgents": {}
+            }
+        }        
+        handoff_agents_graph = self.recursive_create_handoff_agents_graph(self, self.agent_graph[self.name]["HandoffAgents"])
+        self.agent_graph[self.name]["HandoffAgents"] = handoff_agents_graph
+            
+    def store_agent_graph(self, path: str = "agent_graph.json"):
+        with open(path, "w") as f:
+            json.dump(self.agent_graph, f, indent=4)
