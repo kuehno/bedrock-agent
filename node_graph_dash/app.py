@@ -1,6 +1,5 @@
 import plotly.graph_objects as go
 import networkx as nx
-import dash_dangerously_set_inner_html
 import json
 
 with open('agent_graph.json') as f:
@@ -119,23 +118,26 @@ def display_messages(clickData):
         return "Click on a node to see the chat messages."
     
     node = clickData['points'][0]['text']
-    messages_text = ""
+    messages_elements = []
     for msg in messages[node]:
         role = msg['role'].upper()
         content = msg['content']
         for c in content:
             if 'text' in c:
                 css_class = 'user-message' if role == 'USER' else 'assistant-message' if role == 'ASSISTANT' else ''
-                messages_text += f"<span class='{css_class}'>{role}: {c.get('text', 'No text available')}</span><br>"
+                messages_elements.append(html.Span(f"{role}: {c.get('text', 'No text available')}", className=css_class))
+                messages_elements.append(html.Br())
             if 'toolUse' in c:
                 tool_name = c['toolUse']['name']
                 tool_input = c['toolUse']['input']
-                messages_text += f"<span class='tool-called'>TOOL CALLED: {tool_name} with input {tool_input}</span><br>"
+                messages_elements.append(html.Span(f"TOOL CALLED: {tool_name} with input {tool_input}", className='tool-called'))
+                messages_elements.append(html.Br())
             if 'toolResult' in c:
                 tool_result = c['toolResult']['content'][0].get('text', 'No result available')
-                messages_text += f"<span class='tool-result'>TOOL RESULT: {tool_result}</span><br>"
-            messages_text += "<br>"
-    return html.Div([dash_dangerously_set_inner_html.DangerouslySetInnerHTML(messages_text)])
+                messages_elements.append(html.Span(f"TOOL RESULT: {tool_result}", className='tool-result'))
+                messages_elements.append(html.Br())
+            messages_elements.append(html.Br())
+    return html.Div(messages_elements)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
