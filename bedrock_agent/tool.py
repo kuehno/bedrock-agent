@@ -40,7 +40,7 @@ def tool(func: callable) -> Tool:
         if param.default == inspect._empty
     ]
     
-    description = (inspect.getdoc(func) or '').split('\n\n')[0]
+    description = (inspect.getdoc(func) or '')
     tool = Tool(name=name, properties=parameters, description=description, func=func)
     
     def to_json() -> Dict[str, Any]:
